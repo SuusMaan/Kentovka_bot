@@ -29,7 +29,7 @@ phrases = [
     "Выходной, отдыхай."
 ]
 
-@bot.command(name='day_zadanie')
+@bot.command(name='дай_задание')
 async def give_task(ctx):
     # Выбираем случайную фразу из списка
     task = random.choice(phrases)
