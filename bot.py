@@ -22,18 +22,38 @@ bot = commands.Bot(command_prefix="Кентовка, ", intents=intents)
 async def on_ready():
     print(f'Бот запущен как {bot.user.name}')
 
-# Список случайных фраз
-phrases = [
-    "РПКшни уебище РПшное, на твой выбор!",
-    "Обнеси базу в ночь, пока админы спят.",
-    "Выходной, отдыхай."
-]
+# Функция для загрузки фраз из файла
+def load_phrases(file_path):
+    try:
+        with open(file_path, 'r', encoding='utf-8') as file:
+            return [line.strip() for line in file if line.strip()]
+    except FileNotFoundError:
+        print(f"Файл {file_path} не найден.")
+        return []
+
+# Загрузка фраз из файла frazi.txt
+phrases = load_phrases('frazi.txt')
+
+# Загрузка фраз из файла dogmati.txt для команды "напомни правила"
+rules_phrases = load_phrases('dogmati.txt')
 
 @bot.command(aliases=['дай'])
 async def _rules(ctx, arg):
     if arg == 'задание':
-        task = random.choice(phrases)
-        await ctx.send(task)
+        if phrases:
+            task = random.choice(phrases)
+            await ctx.send(task)
+        else:
+            await ctx.send("Список фраз пуст или файл не найден.")
+
+@bot.command(aliases=['напомни'])
+async def rules(ctx, arg):
+    if arg == 'правила':
+        if rules_phrases:
+            rules_list = "\n".join(rules_phrases)
+            await ctx.send(f"Вот догматы кентовки. Тут все по сунне:\n{rules_list}")
+        else:
+            await ctx.send("Список фраз пуст или файл не найден.")
 
 @bot.command(name='пинг')
 async def ping(ctx):
