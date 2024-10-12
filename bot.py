@@ -33,6 +33,7 @@ phrases = [
 async def give_task(ctx):
     # Выбираем случайную фразу из списка
     task = random.choice(phrases)
+    await ctx.send(task)
     print("Команда 'дай задание' вызвана")  # Отладочное сообщение await ctx.send(task)
 
 @bot.command(name='пинг')
