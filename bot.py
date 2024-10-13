@@ -23,7 +23,6 @@ bot = commands.Bot(command_prefix="Кентовка, ", intents=intents)
 # Загрузка списка запретных слов из файла
 with open('forbidden_words.txt', 'r', encoding='utf-8') as f:
     forbidden_words = [line.strip().lower() for line in f]
-
 @bot.event
 async def on_ready():
     print(f'Бот запущен как {bot.user.name}')
@@ -41,14 +40,14 @@ async def on_message(message):
         # Проверяем на наличие запретных слов
         if any(word in content_without_prefix.lower() for word in forbidden_words):
             try:
-                await message.channel.send(f"{message.author.mention}, я снесу нахуй сообщение через 30 секунд, уебище.")
-                await asyncio.sleep(30)  # Ожидание 30 секунд перед удалением сообщения
+                await message.channel.send(f"{message.author.mention}, я снесу нахуй сообщение через 10 секунд, уебище. И ник тебе еще поменяю, уродец.")
+                await asyncio.sleep(10)  # Ожидание 10 секунд перед удалением сообщения
                 await message.delete()
-                new_nick = f"Осел топай в стойло {random.randint(1000, 9999)}" # Определяем новый ник для пользователя 
+                new_nick = f"Осел топай в стойло" # Определяем новый ник для пользователя 
                 await message.author.edit(nick=new_nick) # Изменение ника пользователя 
             except discord.Forbidden:
-                await message.channel.send("Бля обознался, я тебе нихуя сделать не могу. Сорян.")
-            except discord.HTTPException as e:
+                await message.channel.send("Бля обознался, я снес сообщение но ник тебе уебище поменять не смогу. Сорян. А и насчет твоего вопроса. . . ")
+            except discord.HTTPException as e:  
                 print(f"Ошибка при изменении ника: {e}")
 
     await bot.process_commands(message)
@@ -72,7 +71,7 @@ async def rules(ctx, arg=None):
     if arg == 'правила':
         if rules_phrases:
             rules_list = "\n".join(rules_phrases)
-            await ctx.send(f"```diff\n- Вот догматы кентовки. Тут все по сунне:\n{rules_list}```")
+            await ctx.send(f"```diff\n- Вот догматы кентовки. Тут все по сунне:```\n```{rules_list}```")
         else:
             await ctx.send("Список фраз пуст или файл не найден.")
     else:
