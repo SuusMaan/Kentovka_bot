@@ -42,7 +42,7 @@ async def on_message(message):
         # Проверяем на наличие запретных слов
         if any(word in content_without_prefix.lower() for word in forbidden_words):
             try:
-                await message.channel.send(f"{message.author.mention}, я снесу нахуй сообщение через 30 секунд, уебище.")
+                await message.channel.send(f"{message.author.mention}, я снесу нахуй сообщение через 30 секунд, уебище. И ник тебе еще поменяю, уродец.")
                 await asyncio.sleep(30)  # Ожидание 30 секунд перед удалением сообщения
                 await message.delete()
                 new_nick = f"Осел топай в стойло" # Определяем новый ник для пользователя 
