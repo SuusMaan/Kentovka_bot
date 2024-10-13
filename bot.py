@@ -45,11 +45,11 @@ async def on_message(message):
                 await message.channel.send(f"{message.author.mention}, я снесу нахуй сообщение через 30 секунд, уебище.")
                 await asyncio.sleep(30)  # Ожидание 30 секунд перед удалением сообщения
                 await message.delete()
-                new_nick = f"Осел топай в стойло {random.randint(1000, 9999)}" # Определяем новый ник для пользователя 
+                new_nick = f"Осел топай в стойло" # Определяем новый ник для пользователя 
                 await message.author.edit(nick=new_nick) # Изменение ника пользователя 
             except discord.Forbidden:
                 await message.channel.send("Бля обознался, я снес сообщение но ник тебе уебище поменять не смогу. Сорян. А и насчет твоего вопроса. . . ")
-            except discord.HTTPException as e:
+            except discord.HTTPException as e:  
                 print(f"Ошибка при изменении ника: {e}")
 
     await bot.process_commands(message)
