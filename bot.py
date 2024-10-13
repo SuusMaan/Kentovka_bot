@@ -48,7 +48,7 @@ async def on_message(message):
                 new_nick = f"Осел топай в стойло {random.randint(1000, 9999)}" # Определяем новый ник для пользователя 
                 await message.author.edit(nick=new_nick) # Изменение ника пользователя 
             except discord.Forbidden:
-                await message.channel.send("Бля обознался, я тебе нихуя сделать не могу. Сорян.")
+                await message.channel.send("Бля обознался, я снес сообщение но ник тебе уебище поменять не смогу. Сорян. А и насчет твоего вопроса. . . ")
             except discord.HTTPException as e:
                 print(f"Ошибка при изменении ника: {e}")
 
