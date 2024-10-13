@@ -17,14 +17,12 @@ if TOKEN is None:
 
 # Настраиваем намерения
 intents = discord.Intents.default()
-intents.message_content = True  # Включите это намерение
-
-# Создаем экземпляр бота с префиксом "Кентовка,"
+intents.message_content = True
 bot = commands.Bot(command_prefix="Кентовка, ", intents=intents)
 
 # Загрузка списка запретных слов из файла
 with open('forbidden_words.txt', 'r', encoding='utf-8') as f:
-    forbidden_words = [line.strip().lower() for line in f.readlines()]
+    forbidden_words = [line.strip().lower() for line in f]
 @bot.event
 async def on_ready():
     print(f'Бот запущен как {bot.user.name}')
@@ -64,11 +62,7 @@ async def on_command_error(ctx, error):
 @bot.command(aliases=['дай'])
 async def _rules(ctx, arg=None):
     if arg == 'задание':
-        if phrases:
-            task = random.choice(phrases)
-            await ctx.send(task)
-        else:
-            await ctx.send("Список фраз пуст или файл не найден.")
+        await ctx.send(random.choice(phrases) if phrases else "Список фраз пуст или файл не найден.")
     else:
         await ctx.send("Хули тебе дать? По ебалу? Или задание? Тогда так и пиши. Кентовка, дай задание")
 
