@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 from phrase_loader import phrases, rules_phrases
 
 # Загружаем переменные окружения из .env файла
-load_dotenv()  # Убедитесь, что у вас установлен модуль python-dotenv
+load_dotenv()  # Убедитесь, что у вас установлен мдуль python-dotenv
 TOKEN = os.getenv('DISCORD_TOKEN')  # Сохраните токен в .env файле
 
 if TOKEN is None:
@@ -25,6 +25,18 @@ bot = commands.Bot(command_prefix="Кентовка, ", intents=intents)
 # Загрузка списка запретных слов из файла
 with open('forbidden_words.txt', 'r', encoding='utf-8') as f:
     forbidden_words = [line.strip().lower() for line in f.readlines()]
+
+# Список гифок
+gif_urls = [
+    "https://media1.tenor.com/m/eQpw7DS4LSwAAAAC/%D0%B1%D0%B0%D0%B1%D0%B0%D0%B5%D0%B2%D1%81%D0%BA%D0%B8%D0%B9.gif",
+    "https://media1.tenor.com/m/uWlz-LRz4HAAAAAd/%D0%B1%D0%B0%D0%B9-%D0%B1%D0%B0%D0%B9.gif",
+    "https://media.discordapp.net/attachments/768189501918019617/1171558356993974332/prichina.gif?ex=670ce0fe&is=670b8f7e&hm=cfaac35c0b09860a3f9f68d6fad42c08a5e4f7aa19898e78615c6d41ff8b20a2&"
+    # Добавьте сюда другие URL-адреса гифок
+]
+
+# Переменная для хранения последней отправленной гифки
+last_gif_url = None
+
 @bot.event
 async def on_ready():
     print(f'Бот запущен как {bot.user.name}')
@@ -42,14 +54,16 @@ async def on_message(message):
         # Проверяем на наличие запретных слов
         if any(word in content_without_prefix.lower() for word in forbidden_words):
             try:
-                await message.channel.send(f"{message.author.mention}, я снесу нахуй сообщение через 10 секунд, уебище. И ник тебе еще поменяю, уродец.")
+                await message.reply(f"{message.author.mention}, я снесу нахуй сообщение через 10 секунд, уебище. И ник тебе еще поменяю, уродец.", mention_author=True)
                 await asyncio.sleep(10)  # Ожидание 10 секунд перед удалением сообщения
                 await message.delete()
-                new_nick = f"Осел топай в стойло" # Определяем новый ник для пользователя 
-                await message.author.edit(nick=new_nick) # Изменение ника пользователя 
+                new_nick = "Осел топай в стойло"
+                await message.author.edit(nick=new_nick)  # Изменение ника пользователя
+                print("Ник успешно изменен.")
             except discord.Forbidden:
-                await message.channel.send("Бля обознался, я снес сообщение но ник тебе уебище поменять не смогу. Сорян. А и насчет твоего вопроса. . . ")
-            except discord.HTTPException as e:  
+                print("Ошибка: недостаточно прав для изменения ника.")
+                await message.channel.send(f"{message.author.mention} Бля обознался, я снес сообщение но ник тебе уебище поменять не смогу. Сорян. А и насчет твоего вопроса. . .")
+            except discord.HTTPException as e:
                 print(f"Ошибка при изменении ника: {e}")
 
     await bot.process_commands(message)
@@ -83,9 +97,21 @@ async def rules(ctx, arg=None):
     else:
         await ctx.send("Чего тебе блять напомнить? Правила? Ну так и пиши как положено. Кентовка, напомни правила.")
 
-@bot.command(name='пинг')
-async def ping(ctx):
-    await ctx.send('Понг!')
+@bot.command(name='гифку')
+async def gif(ctx):
+    global last_gif_url 
+    gif_url = random.choice(gif_urls)
+    
+    # Проверяем, чтобы новая гифка не совпадала с последней
+    while gif_url == last_gif_url:
+        gif_url = random.choice(gif_urls)
+ # Отправляем гифку
+    await ctx.send(gif_url)
+    
+    # Обновляем последнюю отправленную гифку
+    last_gif_url = gif_url
+
+
 
 # Запуск бота
 bot.run(TOKEN)
