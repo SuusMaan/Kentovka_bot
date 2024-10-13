@@ -77,7 +77,7 @@ async def rules(ctx, arg=None):
     if arg == 'правила':
         if rules_phrases:
             rules_list = "\n".join(rules_phrases)
-            await ctx.send(f"```diff\n- Вот догматы кентовки. Тут все по сунне:\n{rules_list}```")
+            await ctx.send(f"```diff\n- Вот догматы кентовки. Тут все по сунне:```\n```{rules_list}```")
         else:
             await ctx.send("Список фраз пуст или файл не найден.")
     else:
