@@ -2,6 +2,7 @@ import os
 import random
 import asyncio
 import discord
+from datetime import datetime
 from discord.ext import commands
 from dotenv import load_dotenv
 from phrase_loader import phrases, rules_phrases
@@ -31,14 +32,14 @@ def load_data_txt():
     if os.path.exists(DATA_FILE):
         with open(DATA_FILE, 'r', encoding='utf-8') as file:
             for line in file:
-                name, discord_id, reason = map(str.strip, line.strip().split(','))
-                pidoras_list.append({'name': name, 'discord': discord_id, 'reason': reason})
+                name, discord_id, reason, date_added = map(str.strip, line.strip().split(','))
+                pidoras_list.append({'name': name, 'discord': discord_id, 'reason': reason, 'date_added': date_added})
 
 # Функция для сохранения данных в текстовый файл
 def save_data_txt():
     with open(DATA_FILE, 'w', encoding='utf-8') as file:
         for entry in pidoras_list:
-            line = f"{entry['name']},{entry['discord']},{entry['reason']}\n"
+            line = f"{entry['name']},{entry['discord']},{entry['reason']},{entry['date_added']}\n"
             file.write(line)
 
 @bot.event
@@ -57,8 +58,7 @@ async def on_message(message):
             await message.channel.send("Выберите действие: 'Заполнить' или 'Просмотреть'")
 
             def check(m):
-                return m.author == message.author and m.channel == message.channel
-
+                return m.author == message.author and m.channel == message.channel 
             try:
                 response = await bot.wait_for('message', check=check, timeout=30.0)
 
@@ -70,7 +70,8 @@ async def on_message(message):
 
                     try:
                         name, discord_id, reason = map(str.strip, data.split(','))
-                        pidoras_list.append({'name': name, 'discord': discord_id, 'reason': reason})
+                        date_added = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                        pidoras_list.append({'name': name, 'discord': discord_id, 'reason': reason, 'date_added': date_added})
                         save_data_txt()  # Сохраняем данные после добавления await message.channel.send("Данные успешно добавлены!")
                     except ValueError:
                         await message.channel.send("Ошибка! Убедитесь, что вы ввели данные в правильном формате.")
@@ -79,10 +80,12 @@ async def on_message(message):
                     if pidoras_list:
                         message_content = "Список пидорасов:\n"
                         for idx, pidoras in enumerate(pidoras_list, start=1):
-                            message_content += f"{idx}. Имя: {pidoras['name']}, Дискорд: {pidoras['discord']}, Причина: {pidoras['reason']}\n"
+                            message_content += (f"{idx}. Имя: {pidoras['name']}, Дискорд: {pidoras['discord']}, "
+                                                f"Причина: {pidoras['reason']}, Дата добавления: {pidoras['date_added']}\n")
                         await message.channel.send(message_content)
                     else:
                         await message.channel.send("Список пуст.")
+
                 else:
                     await message.channel.send("Неверный выбор. Пожалуйста, введите 'Заполнить' или 'Просмотреть'.")
             except asyncio.TimeoutError:
@@ -99,13 +102,12 @@ async def on_message(message):
                 await message.author.edit(nick=new_nick)
                 print("Ник успешно изменен.")
             except discord.Forbidden:
-                print("Ошибка: недостаточно прав для изменения ника.")
+                print("Ошибка: недостаточо прав для изменения ника.")
                 await message.channel.send(f"{message.author.mention} Бля обознался, я снес сообщение но ник тебе уебище поменять не смогу. Сорян.")
             except discord.HTTPException as e:
                 print(f"Ошибка при изменении ника: {e}")
 
     await bot.process_commands(message)
-
 
 @bot.event
 async def on_command_error(ctx, error):
