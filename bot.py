@@ -8,12 +8,19 @@ from dotenv import load_dotenv
 from phrase_loader import phrases, rules_phrases
 from forbidden_words_loader import forbidden_words
 from gif_manager import get_random_gif
+import openai
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
+OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 
 if TOKEN is None:
     raise ValueError("Токен Discord не задан. Проверьте ваш файл .env.")
+
+if OPENAI_API_KEY is None:
+    raise ValueError("API ключ OpenAI не задан. Проверьте ваш файл .env.")
+
+openai.api_key = OPENAI_API_KEY
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -44,7 +51,8 @@ def save_data_txt():
 
 @bot.event
 async def on_ready():
-    load_data_txt()  # Загружаем данные при запуске бота print(f'Бот запущен как {bot.user.name}')
+    load_data_txt()  # Загружаем данные при запуске бота
+    print(f'Бот запущен как {bot.user.name}')
 
 @bot.event
 async def on_message(message):
@@ -54,40 +62,26 @@ async def on_message(message):
     if message.content.startswith("Кентовка, "):
         content_without_prefix = message.content[len("Кентовка, "):].strip()
 
-        if content_without_prefix.lower() == 'список пидорасов':
-            await message.channel.send("Выберите действие: 'Заполнить' или 'Просмотреть'")
+        if content_without_prefix.lower() == 'напиши мне квенту':
+            await message.channel.send("Какие данные указать для квенты?")
 
             def check(m):
-                return m.author == message.author and m.channel == message.channel 
+                return m.author == message.author and m.channel == message.channel
+
             try:
-                response = await bot.wait_for('message', check=check, timeout=30.0)
+                response = await bot.wait_for('message', check=check, timeout=60.0)
+                user_data = response.content.strip()
+                await message.channel.send("Генерирую квенту...")
 
-                if response.content.strip().lower() == 'заполнить':
-                    await message.channel.send("Введите данные в формате: Имя, дискорд, причина")
+                # Запрос к ChatGPT 
+                completion = openai.Completion.create(
+                    engine="text-davinci-003",
+                    prompt=f"Напиши мне квенту с использованием следующих данных: {user_data}",
+                    max_tokens=150 )
 
-                    data_response = await bot.wait_for('message', check=check, timeout=60.0)
-                    data = data_response.content.strip()
+                story = completion.choices[0].text.strip()
+                await message.channel.send(story)
 
-                    try:
-                        name, discord_id, reason = map(str.strip, data.split(','))
-                        date_added = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                        pidoras_list.append({'name': name, 'discord': discord_id, 'reason': reason, 'date_added': date_added})
-                        save_data_txt()  # Сохраняем данные после добавления await message.channel.send("Данные успешно добавлены!")
-                    except ValueError:
-                        await message.channel.send("Ошибка! Убедитесь, что вы ввели данные в правильном формате.")
-
-                elif response.content.strip().lower() == 'просмотреть':
-                    if pidoras_list:
-                        message_content = "Список пидорасов:\n"
-                        for idx, pidoras in enumerate(pidoras_list, start=1):
-                            message_content += (f"{idx}. Имя: {pidoras['name']}, Дискорд: {pidoras['discord']}, "
-                                                f"Причина: {pidoras['reason']}, Дата добавления: {pidoras['date_added']}\n")
-                        await message.channel.send(message_content)
-                    else:
-                        await message.channel.send("Список пуст.")
-
-                else:
-                    await message.channel.send("Неверный выбор. Пожалуйста, введите 'Заполнить' или 'Просмотреть'.")
             except asyncio.TimeoutError:
                 await message.channel.send("Время ожидания истекло. Попробуйте снова.")
             return
